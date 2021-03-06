@@ -29,7 +29,7 @@ st.sidebar.header("**User Input Parameters**")
 age = st.sidebar.slider("Age", np.int(df['age'].min(
 )), np.int(df['age'].max()), np.int(math.floor(df['age'].mean())))
 workclass = st.sidebar.selectbox(
-    "Workclass", list(df['workclass'].unique()[1:]))
+    "Workclass", list(df['workclass'].unique()))
 fnlwgt = st.sidebar.slider("Final Weight", np.int(df['fnlwgt'].min(
 )), np.int(df['fnlwgt'].max()), np.int(math.floor(df['fnlwgt'].mean())))
 education = st.sidebar.selectbox("Edication", list(
@@ -38,9 +38,9 @@ education_num = education_dict[education]
 maritalstatus = st.sidebar.selectbox("Marital Status", list(
     df.sort_values(by='marital.status')['marital.status'].unique()))
 occupation = st.sidebar.selectbox("Occupation", list(
-    df.sort_values(by='occupation')['occupation'].unique()[1:]))
+    df.sort_values(by='occupation')['occupation'].unique()))
 relationship = st.sidebar.selectbox("Relationship", list(
-    df.sort_values(by='relationship')['relationship'].unique()[1:]))
+    df.sort_values(by='relationship')['relationship'].unique()))
 race = st.sidebar.selectbox("Race", list(
     df.sort_values(by='race')['race'].unique()))
 sex = st.sidebar.selectbox("Sex", list(
@@ -52,7 +52,7 @@ loss = st.sidebar.slider("Capital Loss", np.int(df['capital.loss'].min(
 hoursperweek = st.sidebar.slider("Hours Per Week", np.int(df['hours.per.week'].min(
 )), np.int(df['hours.per.week'].max()), np.int(math.floor(df['hours.per.week'].mean())))
 nativecountry = st.sidebar.selectbox("Native Country", list(
-    df['native.country'].sort_values().unique()[1:]), 38)
+    df['native.country'].sort_values().unique()), 38)
 # income=st.sidebar.selectbox("Income",list(df['income'].unique()))
 # Main Area
 # DataTab
