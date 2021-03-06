@@ -10,9 +10,17 @@ import warnings
 warnings.filterwarnings('ignore')
 
 # Data
-df = pd.read_csv("adult.csv")
+# df = pd.read_csv("adult.csv")
+# df = pd.read_csv("Update_adult.csv")
+
+@st.cache(allow_output_mutation=True, persist=True)
+def load_data():
+    return pd.read_csv("Update_adult.csv", na_values='?')
+
+df = load_data()
+
 education_dict = dict(
-    zip(df['education'].unique(), df['education.num'].apply(str).unique()))
+    zip(df['education'].unique(), df['education.num'].unique()))
 
 
 # Sidebar
@@ -53,9 +61,9 @@ data_expander.header("Dataset")
 data_expander.write("""
  **Rows:** """ + str(df.shape[0])+""" **Attributes:** """+str(df.shape[1]))
 
-data_expander.dataframe(df)
+data_expander.dataframe(df.head(10))
 
-df.shape
+# df.shape
 
 # st.dataframe(df.groupby('native.country').count()['age'])
 
@@ -64,11 +72,11 @@ df.shape
 # st.write(df['native.country'].value_counts().plot.pie(autopct="%1.1f%%"))
 # st.pyplot()
 
-fig, ax = plt.subplots(2, 3, figsize=(10, 8))
-for i, v in enumerate(df.select_dtypes(include=np.number)):
-    sns.kdeplot(data=df[v], ax=ax.flatten()[i])
-plt.tight_layout()
-st.pyplot(plt)
+# fig, ax = plt.subplots(2, 3, figsize=(10, 8))
+# for i, v in enumerate(df.select_dtypes(include=np.number)):
+#     sns.kdeplot(data=df[v], ax=ax.flatten()[i])
+# plt.tight_layout()
+# st.pyplot(plt)
 
 # User Input Tab
 @st.cache(show_spinner=True,allow_output_mutation=True)
@@ -79,7 +87,7 @@ def input_params(age,workclass,fnlwgt,education,education_num,maritalstatus,occu
         'workclass': [workclass],
         'fnlwgt': [fnlwgt],
         'education': [education],
-        'education.num': education_num, 
+        'education.num': [education_num], 
         'marital.status': [maritalstatus],
         'occupation': [occupation],
         'relationship': [relationship],
@@ -94,5 +102,22 @@ def input_params(age,workclass,fnlwgt,education,education_num,maritalstatus,occu
     
 selected_data=input_params(age,workclass,fnlwgt,education,education_num,maritalstatus,occupation,relationship,race,sex,gain,loss,hoursperweek,nativecountry)
 user_input_expander = st.beta_expander("User Input")
-user_input_expander.header('Data')
+user_input_expander.write('Data')
 user_input_expander.dataframe(selected_data)
+
+prediction_expander=st.beta_expander("Prediction")
+prediction_expander.write("Result")
+enc=pickle.load(open("OneHotEncoder.pkl","rb"))
+cat_cols=['workclass', 'education', 'marital.status', 'occupation',
+       'relationship', 'race', 'sex', 'native.country']
+num_data=selected_data.select_dtypes(include=np.number)
+data_enc=pd.concat([pd.DataFrame(num_data.values,columns=num_data.columns),pd.DataFrame(enc.transform(selected_data[cat_cols]).toarray(),columns=enc.get_feature_names())],axis=1)
+# prediction_expander.dataframe(data_enc)
+lg=pickle.load(open("lg.pkl","rb"))
+res=lg.predict(data_enc.drop(columns=['fnlwgt']))
+res_prob=lg.predict_proba((data_enc.drop(columns=['fnlwgt'])))
+prediction_expander.dataframe(pd.DataFrame({"Class":res})['Class'].map({0:"<=50K",1:">50K"}))
+
+prediction_expander.write("Probabilities")
+prediction_expander.dataframe(pd.DataFrame(res_prob,columns=['<=50K','>50K']))
+
